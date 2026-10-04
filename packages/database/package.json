@@ -1,0 +1,41 @@
+{
+  "name": "@repo/database",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "prisma generate || true",
+    "db:generate": "prisma generate",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate": "prisma migrate deploy",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed:quiz": "tsx prisma/seed-quiz.ts",
+    "db:status": "prisma migrate status",
+    "db:studio": "prisma studio --port 5555 --browser none",
+    "db:safediff": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script -o prisma/safe_migration.sql",
+    "db:safecheck": "powershell -NoProfile -Command \"$r = Select-String -Path prisma/safe_migration.sql -Pattern 'DROP TABLE|DROP COLUMN|DROP TYPE|TRUNCATE|ALTER TABLE .* DROP'; if ($r) { Write-Error 'Destructive SQL detected! Review prisma/safe_migration.sql before applying.'; $r | ForEach-Object { Write-Host $_.Line }; exit 1 } else { Write-Host 'OK: no destructive operations found' }\"",
+    "db:safepush": "pnpm run db:safediff && pnpm run db:safecheck",
+    "db:safeapply": "prisma db execute --file prisma/safe_migration.sql"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "pg": "^8.22.0"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1078.0",
+    "@prisma/config": "^7.9.1",
+    "@types/node": "^22.15.3",
+    "better-auth": "^1.6.20",
+    "node-html-parser": "5",
+    "prisma": "^7.8.0",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
