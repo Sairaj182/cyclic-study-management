@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -16,8 +11,9 @@ datasource db {
 
 model User {
   id                  String           @id
+  isSuperAdmin        Boolean         @default(false)
   name                String?
-  email               String?          @unique
+  email               String          @unique
   emailVerified       Boolean          @default(false)
   phoneNumber         String?          @unique
   phoneNumberVerified Boolean          @default(false)
@@ -30,8 +26,9 @@ model User {
   sessions            Session[]
   accounts            Account[]
   trustedDevices      TrustedDevice[]
-  
-  
+  tasks               Task[]
+  studyLogs           StudyLog[]
+
   @@map("user")
 }
 
@@ -84,6 +81,15 @@ model Verification {
   @@map("verification")
 }
 
+model OtpCooldown {
+  phoneNumber String   @id
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("otp_cooldown")
+}
+
 model TrustedDevice {
   id              String    @id @default(cuid())
   userId          String
@@ -99,3 +105,72 @@ model TrustedDevice {
   @@index([userId])
   @@index([expiresAt])
 }
+
+model Task {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  schedules    Schedule[]
+  studyLogs   StudyLog[]
+
+  taskTitle       String    @db.VarChar(100)
+  taskDesc        String?    @db.VarChar(500)
+  priority        TaskPriority      @default(MEDIUM)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("task")
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model StudyLog {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId      String?
+  task        Task?        @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  title       String       @db.VarChar(100)
+  description String?      @db.VarChar(500)
+  priority    TaskPriority @default(MEDIUM)
+  loggedAt    DateTime     @default(now())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId, loggedAt])
+  @@index([taskId])
+  @@map("study_log")
+}
+
+model Schedule {
+  id              String    @id @default(cuid())
+
+  taskId          String
+  task            Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  scheduleDate    DateTime
+
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+
+  updatedAt       DateTime  @updatedAt
+
+  @@index([scheduleDate])
+  @@index([taskId, scheduleDate])
+  @@index([scheduleDate, taskId])
+  @@map("schedule")
+}
+
+// model RevisionPolicy {
+//   id       String @id @default(cuid())
+//   name     String
+//
+//   intervals Int[]
+// }

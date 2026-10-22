@@ -3,6 +3,7 @@ import fastifyCookie from "@fastify/cookie";
 import fastifyCors from "@fastify/cors";
 import fastifyJwt from "@fastify/jwt";
 import fastifyRateLimit from "@fastify/rate-limit";
+import fastifyHelmet from "@fastify/helmet";
 import { env } from "./env";
 import { registerRoutes } from "./routes";
 
@@ -19,6 +20,7 @@ export function buildApp() {
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   });
+  app.register(fastifyHelmet);
 
   app.register(fastifyCookie);
 

@@ -1,6 +1,15 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "API_PORT",
+    "BETTER_AUTH_URL",
+    "CORS_ORIGIN",
+    "HOST",
+    "NEXT_PUBLIC_API_URL",
+    "NODE_ENV",
+    "PORT_MAIN_WEBSITE"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
